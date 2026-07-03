@@ -112,6 +112,13 @@ function fcny(n) {
   return n.toFixed(2);
 }
 function pad(n, w) { return n.toString().padStart(w); }
+function fmtReset(sec) {
+  if (!sec || sec <= 0) return '';
+  if (sec >= 86400) return Math.round(sec / 86400) + 'd';
+  if (sec >= 3600) return Math.round(sec / 3600) + 'h';
+  if (sec >= 60) return Math.round(sec / 60) + 'm';
+  return sec + 's';
+}
 
 // ---- TrueColor gradient: sage → amber → rust (Anthropic warm) ----------------
 function rgb(r, g, b, s) { return NC ? s : '\x1b[38;2;' + r + ';' + g + ';' + b + 'm' + s + Z; }
@@ -463,7 +470,8 @@ const model = I.model?.display_name || '';
           const [r, g, b] = barGrad(100 - pct);
           const barStr = S('38;5;240', '▐') + rgb(r, g, b, '█'.repeat(filled)) + S('38;5;237', '░'.repeat(empty)) + S('38;5;240', '▌');
           const pctStr = rgb(r, g, b, pad(pct, 2) + '%');
-          parts.push(S(C.muted, lbl + ' ') + barStr + ' ' + pctStr);
+          const resetStr = win.resetsInSeconds ? ' ' + S(C.clock, '⇢' + fmtReset(win.resetsInSeconds)) : '';
+          parts.push(S(C.muted, lbl + ' ') + barStr + ' ' + pctStr + resetStr);
         }
         if (parts.length) line3 = parts.join('  ');
       }
