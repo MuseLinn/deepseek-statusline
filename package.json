@@ -1,7 +1,7 @@
 {
   "name": "claude-code-statusline",
-  "version": "0.6.0",
-  "description": "Multi-provider statusline for Claude Code — DeepSeek, opencode go, Anthropic. Context bar, cost, tokens, git porcelain.",
+  "version": "0.10.0",
+  "description": "Multi-provider statusline for Claude Code — rainbow, Pac-Man bar, per-character TrueColor model badge, DeepSeek, opencode go, Anthropic.",
   "license": "MIT",
   "author": "",
   "type": "module",

@@ -1,13 +1,13 @@
 {
   "name": "claude-code-statusline",
-  "version": "0.7.1",
-  "description": "Multi-provider statusline for Claude Code — DeepSeek ¥ tracking, opencode go subscription usage, Anthropic context bar. TrueColor gradient, git porcelain, code churn.",
+  "version": "0.10.0",
+  "description": "Multi-provider statusline for Claude Code — rainbow animation, Pac-Man context bar, per-character TrueColor model badge, DeepSeek ¥ tracking, opencode go usage, code churn, subagent panel.",
   "author": {
     "name": "MuseLinn",
     "url": "https://github.com/MuseLinn"
   },
   "repository": "https://github.com/MuseLinn/claude-code-statusline",
   "license": "MIT",
-  "keywords": ["statusline", "deepseek", "opencode", "context-bar", "cost-tracking"],
+  "keywords": ["statusline", "rainbow", "deepseek", "opencode", "context-bar", "cost-tracking"],
   "main": "commands/setup.ts"
 }
