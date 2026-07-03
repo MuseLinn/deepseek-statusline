@@ -16,7 +16,7 @@ const CACHE = path.join(HOME, '.claude', 'deepseek-cache.json');
 const SLCFG = path.join(HOME, '.claude', 'statusline-config.json');
 const BAL_TTL  = 10 * 1000;       // balance API throttle (ms)
 const BAL_STALE = 20 * 1000;      // show ~ indicator after this age (ms)
-const GIT_TTL = 3 * 1000;
+const GIT_TTL = 5 * 1000;
 const IO_MIN = 1500;
 const NC = !!process.env.NO_COLOR || !!process.env.CLAUDE_CODE_NO_COLOR;
 
@@ -125,7 +125,10 @@ function barGrad(pct) {
 }
 
 // ---- HSV → RGB for rainbow animation ---------------------------------------
+// Min-brightness boost (MIN=80) ensures all hues are readable on dark bg.
+// Without this, pure blue (~rgb(0,0,255)) is illegible on 48;5;236 dark bg.
 function hsvToRgb(h, s, v) {
+  const MIN = 80;
   const i = Math.floor(h * 6);
   const f = h * 6 - i;
   const p = v * (1 - s);
@@ -134,7 +137,7 @@ function hsvToRgb(h, s, v) {
   const m = i % 6;
   const [r, g, b] = m === 0 ? [v, t, p] : m === 1 ? [q, v, p] : m === 2 ? [p, v, t] :
                       m === 3 ? [p, q, v] : m === 4 ? [t, p, v] : [v, p, q];
-  return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+  return [Math.max(MIN, Math.round(r * 255)), Math.max(MIN, Math.round(g * 255)), Math.max(MIN, Math.round(b * 255))];
 }
 
 // Per-character rainbow gradient with background block support.
@@ -374,7 +377,7 @@ const model = I.model?.display_name || '';
     // _animFrame advances at 20fps within a process; across invocations the
     // value read from cache ensures seamless hue continuity.
     let _animFrame = cache.rainbowFrame || 0;
-    cache.rainbowFrame = _animFrame + 1;
+    cache.rainbowFrame = _animFrame + 30;
 
     // ── context (used %) ───────────────────────────────────────────────────
     // Primary: used_percentage from API. Fallback: total_input_tokens/window_size.
