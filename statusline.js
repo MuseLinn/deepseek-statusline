@@ -294,19 +294,23 @@ function getGit() {
   }
 }
 
-// ---- progress bar: Pac-Man eats beans ------------------------------------
-// Eaten: ● (gradient sage → rust), Pac-Man: ᗧ (yellow), Uneaten: · (dim)
+// ---- progress bar: Pac-Man eats rainbow beans ----------------------------
+// Eaten: ● (rainbow per position+frame), Pac-Man: ᗧ (yellow), Uneaten: · (dim)
 // At 100% all beans eaten, Pac-Man disappears
-function bar(pct) {
-  const [r, g, b] = barGrad(100 - pct);
+function bar(pct, frame) {
+  const rainbowBean = (i) => {
+    const hue = ((frame + i * 30) % 360) / 360;
+    const [rr, gg, bb] = hsvToRgb(hue, 0.85, 1.0);
+    return rgb(rr, gg, bb, '●');
+  };
   if (pct >= 100) {
     let out = '';
-    for (let i = 0; i < 10; i++) out += rgb(r, g, b, '●');
+    for (let i = 0; i < 10; i++) out += rainbowBean(i);
     return out;
   }
   const eaten = Math.min(9, Math.round(pct / 10));
   let out = '';
-  for (let i = 0; i < eaten; i++) out += rgb(r, g, b, '●');
+  for (let i = 0; i < eaten; i++) out += rainbowBean(i);
   out += '\x1b[38;2;255;204;0mᗧ' + Z;
   for (let i = eaten; i < 9; i++) out += S('38;5;237', '·');
   return out;
@@ -582,9 +586,19 @@ const model = I.model?.display_name || '';
     // Agent prefix
     const agentPrefix = agentName ? S(C.muted, '[' + agentName + '] ') : '';
 
-    // Model badge — rainbow animated on the model label, keeps background block
-    const _modelRainbow = rainbowText(' ' + mlab + ' ', _animFrame, R(C.bbg));
-    const L1model = agentPrefix + _modelRainbow + Z + efTxt + vimTag;
+    // Model badge — tier label in official Claude color, actual model name rainbow
+    const _bg = R(C.bbg);
+    let _badgeInner;
+    if (tm) {
+      // Tier label: Fable lavender, Sonnet blue, Opus peach, Haiku sage
+      const _tierTag = '\x1b[' + tm.c + 'm' + tm.t + Z;
+      const _arrow = _bg + '\x1b[' + C.muted + 'm → ' + Z;
+      const _mRainbow = rainbowText(tm.name || short, _animFrame, _bg);
+      _badgeInner = _bg + ' ' + _tierTag + _arrow + _mRainbow + _bg + ' ';
+    } else {
+      _badgeInner = _bg + ' ' + rainbowText(short, _animFrame, _bg) + _bg + ' ';
+    }
+    const L1model = agentPrefix + _badgeInner + Z + efTxt + vimTag;
 
     // Right side items (bal is lowest priority for collapse)
     const L1r = []; // { pri: 0-4, text }
@@ -616,13 +630,13 @@ const model = I.model?.display_name || '';
     if (usedPct !== null) {
       // barGrad: 0% used = sage (safe) → 100% used = rust (danger)
       // barGrad input is "remaining %" so we pass (100 - usedPct)
-      prog = S('38;5;240', '▐') + bar(usedPct) + S('38;5;240', '▌') + (() => {
+      prog = S('38;5;240', '▐') + bar(usedPct, _animFrame) + S('38;5;240', '▌') + (() => {
         const [r, g, b] = barGrad(100 - usedPct);
         return rgb(r, g, b, pad(usedPct, 3) + '%');
       })();
       ctxWarn = usedPct >= 85 ? S(C.warn, ' ⚠') : '';
     } else {
-      prog = S('38;5;240', '▐') + bar(0) + S('38;5;240', '▌') + S('38;5;243', ' ...');
+      prog = S('38;5;240', '▐') + bar(0, _animFrame) + S('38;5;240', '▌') + S('38;5;243', ' ...');
     }
     L2.push(prog + ctxWarn);
 
