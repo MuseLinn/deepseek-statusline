@@ -664,50 +664,8 @@ const model = I.model?.display_name || '';
 
     const output = '\r\x1b[K' + line1 + '\n\r\x1b[K' + line2 + '\n' + (line3 ? '\r\x1b[K' + line3 + '\n' : '');
     process.stdout.write(output);
-    // Persist last successful output for fallback on next run
+    // Persist last successful output + rainbow frame for cross-invocation continuity
     const _c = rcache(); _c._lastStatus = output; _c._forceWrite = true; wcache(_c);
-
-    // ═════════════════════════════════════════════════════════════════════════
-    // ANIMATION LOOP — persistent process, 20fps rainbow on model badge
-    // ═════════════════════════════════════════════════════════════════════════
-    const _L1meta = L1.map(e => ({ pri: e.pri, text: e.text }));
-    const _L1rMeta = L1r.map(e => ({ pri: e.pri, text: e.text }));
-    const _mlab_ = mlab;
-    const _agentPref = agentPrefix;
-    const _line2_ = line2;
-    const _line3_ = line3;
-
-    const _animTimer = setInterval(() => {
-      try {
-        _animFrame++;
-        const mr = rainbowText(' ' + _mlab_ + ' ', _animFrame, R(C.bbg));
-        const modelBadge = _agentPref + mr + Z + _efTxt + _vimTag;
-        let parts;
-        if (_collapsePri < 4) {
-          parts = _L1meta.filter(e => e.pri >= _collapsePri).map(e => e.text);
-          parts.push(modelBadge);
-          parts.push(..._L1rMeta.filter(e => e.pri >= _collapsePri).map(e => e.text));
-        } else {
-          parts = _L1meta.filter(e => e.pri >= 3).map(e => e.text);
-          parts.push(modelBadge);
-          parts.push(..._L1rMeta.filter(e => e.pri >= 3).map(e => e.text));
-        }
-        let nl1 = parts.join(SEP);
-        if (vlen(nl1) > col) nl1 = visTrunc(nl1, col);
-
-        const animOut = '\r\x1b[K' + nl1 + '\n\r\x1b[K' + _line2_ + '\n' + (_line3_ ? '\r\x1b[K' + _line3_ + '\n' : '');
-        process.stdout.write(animOut);
-        const _c2 = rcache(); _c2.rainbowFrame = _animFrame; _c2._lastStatus = animOut; _c2._forceWrite = true; wcache(_c2);
-      } catch (e) {}
-    }, 50);
-
-    function _cleanup() {
-      const _cf = rcache(); _cf.rainbowFrame = _animFrame; _cf._forceWrite = true; wcache(_cf);
-      clearInterval(_animTimer);
-      process.exit(0);
-    }
-    process.on('SIGTERM', _cleanup);
-    process.on('SIGINT', _cleanup);
 
   } catch (e) {
     // Keep previous output on error — prevents blank flicker
