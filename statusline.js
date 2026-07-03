@@ -44,6 +44,7 @@ const C = {
   dir:    '38;5;110',   // muted blue
   tierS:  '38;5;110',   // sonnet blue
   tierO:  '38;5;215',   // opus peach
+  tierF:  '38;5;177',   // fable lavender
   tierH:  '38;5;108',   // haiku sage
   efHi:   '38;5;203',   // max effort red
   efLo:   '38;5;108',   // high effort sage
@@ -303,6 +304,7 @@ const model = I.model?.display_name || '';
     // ── model ───────────────────────────────────────────────────────────────
     const short = model.includes(',') ? model.split(',')[1].trim() : model.replace(/\[.*?\]/g, '').trim();
     const TM = [
+      { t: 'Fable',  name: env.ANTHROPIC_DEFAULT_FABLE_MODEL_NAME || '',  id: env.ANTHROPIC_DEFAULT_FABLE_MODEL || '',  c: C.tierF || C.tierO },
       { t: 'Sonnet', name: env.ANTHROPIC_DEFAULT_SONNET_MODEL_NAME || '', id: env.ANTHROPIC_DEFAULT_SONNET_MODEL || '', c: C.tierS },
       { t: 'Opus',   name: env.ANTHROPIC_DEFAULT_OPUS_MODEL_NAME || '',   id: env.ANTHROPIC_DEFAULT_OPUS_MODEL || '',   c: C.tierO },
       { t: 'Haiku',  name: env.ANTHROPIC_DEFAULT_HAIKU_MODEL_NAME || '',  id: env.ANTHROPIC_DEFAULT_HAIKU_MODEL || '',  c: C.tierH },
