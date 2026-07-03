@@ -377,7 +377,7 @@ const model = I.model?.display_name || '';
     // _animFrame advances at 20fps within a process; across invocations the
     // value read from cache ensures seamless hue continuity.
     let _animFrame = cache.rainbowFrame || 0;
-    cache.rainbowFrame = _animFrame + 30;
+    cache.rainbowFrame = _animFrame + 15;
 
     // ── context (used %) ───────────────────────────────────────────────────
     // Primary: used_percentage from API. Fallback: total_input_tokens/window_size.
