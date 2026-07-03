@@ -473,7 +473,7 @@ const model = I.model?.display_name || '';
           const resetStr = win.resetsInSeconds ? ' ' + S(C.clock, '⇢' + fmtReset(win.resetsInSeconds)) : '';
           parts.push(S(C.muted, lbl + ' ') + barStr + ' ' + pctStr + resetStr);
         }
-        if (parts.length) line3 = parts.join('  ');
+        if (parts.length) line3 = parts.join(' ');
       }
     }
 
