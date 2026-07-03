@@ -124,6 +124,36 @@ function barGrad(pct) {
   return [r, g, b];
 }
 
+// ---- HSV → RGB for rainbow animation ---------------------------------------
+function hsvToRgb(h, s, v) {
+  const i = Math.floor(h * 6);
+  const f = h * 6 - i;
+  const p = v * (1 - s);
+  const q = v * (1 - f * s);
+  const t = v * (1 - (1 - f) * s);
+  const m = i % 6;
+  const [r, g, b] = m === 0 ? [v, t, p] : m === 1 ? [q, v, p] : m === 2 ? [p, v, t] :
+                      m === 3 ? [p, q, v] : m === 4 ? [t, p, v] : [v, p, q];
+  return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+}
+
+// Per-character rainbow gradient with background block support.
+// Each non-space char gets (bgSeq + rainbowFG + char + reset) so the
+// background seam is invisible — every char re-applies bgSeq.
+function rainbowText(text, frame, bgSeq) {
+  if (NC || !text) return text;
+  const charsPerCycle = 12;
+  const step = 360 / charsPerCycle;
+  let out = '';
+  for (let i = 0; i < text.length; i++) {
+    if (text[i] === ' ') { out += bgSeq + ' '; continue; }
+    const hue = ((frame + i * step) % 360) / 360;
+    const [r, g, b] = hsvToRgb(hue, 0.85, 1.0);
+    out += bgSeq + '\x1b[38;2;' + r + ';' + g + ';' + b + 'm' + text[i] + Z;
+  }
+  return out;
+}
+
 // ---- I/O ---------------------------------------------------------------------
 function rjson(p) { try { return JSON.parse(fs.readFileSync(p, 'utf8')); } catch { return null; } }
 function wjson(p, d) { try { fs.writeFileSync(p, JSON.stringify(d), 'utf8'); } catch {} }
@@ -336,6 +366,12 @@ const model = I.model?.display_name || '';
     const cache = rcache();
     let s = cache.sessions[sid] || { in: 0, out: 0, cache: 0 };
 
+    // ── rainbow animation frame (persistent cumulative counter) ───────────────
+    // _animFrame advances at 20fps within a process; across invocations the
+    // value read from cache ensures seamless hue continuity.
+    let _animFrame = cache.rainbowFrame || 0;
+    cache.rainbowFrame = _animFrame + 1;
+
     // ── context (used %) ───────────────────────────────────────────────────
     // Primary: used_percentage from API. Fallback: total_input_tokens/window_size.
     // Null when no API response yet — show empty state instead of 100%.
@@ -546,8 +582,9 @@ const model = I.model?.display_name || '';
     // Agent prefix
     const agentPrefix = agentName ? S(C.muted, '[' + agentName + '] ') : '';
 
-    // Model badge (always kept)
-    const L1model = agentPrefix + R(C.bbg) + R(C.bag) + ' ' + mlab + ' ' + Z + efTxt + vimTag;
+    // Model badge — rainbow animated on the model label, keeps background block
+    const _modelRainbow = rainbowText(' ' + mlab + ' ', _animFrame, R(C.bbg));
+    const L1model = agentPrefix + _modelRainbow + Z + efTxt + vimTag;
 
     // Right side items (bal is lowest priority for collapse)
     const L1r = []; // { pri: 0-4, text }
@@ -563,9 +600,10 @@ const model = I.model?.display_name || '';
       return parts.join(SEP);
     }
     let line1 = assembleL1(1);
-    if (vlen(line1) > col) line1 = assembleL1(2);   // drop session name + bal
-    if (vlen(line1) > col) line1 = assembleL1(3);   // drop repo + dir too
-    if (vlen(line1) > col) line1 = visTrunc(line1, col);  // hard cut
+    let _collapsePri = 1;
+    if (vlen(line1) > col) { line1 = assembleL1(2); _collapsePri = 2; }   // drop session name + bal
+    if (vlen(line1) > col) { line1 = assembleL1(3); _collapsePri = 3; }   // drop repo + dir too
+    if (vlen(line1) > col) { line1 = visTrunc(line1, col); _collapsePri = 4; }  // hard cut
 
     // ═════════════════════════════════════════════════════════════════════════
     // LINE 2
@@ -628,6 +666,49 @@ const model = I.model?.display_name || '';
     process.stdout.write(output);
     // Persist last successful output for fallback on next run
     const _c = rcache(); _c._lastStatus = output; _c._forceWrite = true; wcache(_c);
+
+    // ═════════════════════════════════════════════════════════════════════════
+    // ANIMATION LOOP — persistent process, 20fps rainbow on model badge
+    // ═════════════════════════════════════════════════════════════════════════
+    const _L1meta = L1.map(e => ({ pri: e.pri, text: e.text }));
+    const _L1rMeta = L1r.map(e => ({ pri: e.pri, text: e.text }));
+    const _mlab_ = mlab;
+    const _agentPref = agentPrefix;
+    const _line2_ = line2;
+    const _line3_ = line3;
+
+    const _animTimer = setInterval(() => {
+      try {
+        _animFrame++;
+        const mr = rainbowText(' ' + _mlab_ + ' ', _animFrame, R(C.bbg));
+        const modelBadge = _agentPref + mr + Z + _efTxt + _vimTag;
+        let parts;
+        if (_collapsePri < 4) {
+          parts = _L1meta.filter(e => e.pri >= _collapsePri).map(e => e.text);
+          parts.push(modelBadge);
+          parts.push(..._L1rMeta.filter(e => e.pri >= _collapsePri).map(e => e.text));
+        } else {
+          parts = _L1meta.filter(e => e.pri >= 3).map(e => e.text);
+          parts.push(modelBadge);
+          parts.push(..._L1rMeta.filter(e => e.pri >= 3).map(e => e.text));
+        }
+        let nl1 = parts.join(SEP);
+        if (vlen(nl1) > col) nl1 = visTrunc(nl1, col);
+
+        const animOut = '\r\x1b[K' + nl1 + '\n\r\x1b[K' + _line2_ + '\n' + (_line3_ ? '\r\x1b[K' + _line3_ + '\n' : '');
+        process.stdout.write(animOut);
+        const _c2 = rcache(); _c2.rainbowFrame = _animFrame; _c2._lastStatus = animOut; _c2._forceWrite = true; wcache(_c2);
+      } catch (e) {}
+    }, 50);
+
+    function _cleanup() {
+      const _cf = rcache(); _cf.rainbowFrame = _animFrame; _cf._forceWrite = true; wcache(_cf);
+      clearInterval(_animTimer);
+      process.exit(0);
+    }
+    process.on('SIGTERM', _cleanup);
+    process.on('SIGINT', _cleanup);
+
   } catch (e) {
     // Keep previous output on error — prevents blank flicker
     const c2 = rcache();
