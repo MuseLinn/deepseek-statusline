@@ -5,9 +5,9 @@
 A [Claude Code](https://code.claude.com/) statusline plugin with Anthropic-warm palette, supporting DeepSeek, opencode go, and Anthropic providers. Pac-Man progress bar, git porcelain, code churn.
 
 ```
-⦗╌╌╌╌╌ᗧ••••⦘ 73% │ in:1.7M │ 📦54.8M 96.9% │ ¥0.0092 │ +10740 -23
+⦗●●●●ᗧ•••••⦘ 73% │ 384.2K/1.0M │ ¥0.0092 │ +10740 -23
 main +1M·1A │ ~/project │ Fable → deepseek-v4-pro ⚡max │ ¥18.50 │ 14:32
-5h ‹⣿⣿⣿⡟⠀› 50% ⇢3h  wk ‹⣿⣿⡟⠀⠀› 25% ⇢4d  mo ‹⣿⡟⠀⠀⠀› 12% ⇢18d
+5h ‹⣿⣿⣿⡟⠀› 50% ⇢ 3h  wk ‹⣿⣿⡟⠀⠀› 25% ⇢ 1d  mo ‹⣿⡟⠀⠀⠀› 12% ⇢ 19d
 ```
 
 ## Features
