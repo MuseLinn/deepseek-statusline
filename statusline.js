@@ -50,21 +50,21 @@ const C = {
   efLo:   '38;5;108',   // high effort sage
   bag:    '38;5;229',   // cream text
   bbg:    '48;5;236',   // warm dark block bg
-  sep:    '38;5;240',   // separator grey
+  sep:    '38;5;243',   // separator grey
   tIn:    '38;5;110',   // input blue
   tOut:   '38;5;174',   // output rose
   tCch:   '38;5;180',   // cache tan
   cost:   '38;5;215',   // cost amber
   bal:    '38;5;215',   // balance amber
-  clock:  '38;5;144',   // warm grey
-  muted:  '38;5;243',   // dim
+  clock:  '38;5;187',   // warm cream
+  muted:  '38;5;246',   // dim
   warn:   '38;5;203',   // rust
   add:    '38;5;114',   // added teal
   del:    '38;5;174',   // deleted rose
   prOk:   '38;5;108',
   prPend: '38;5;216',
   prChg:  '38;5;209',
-  prDraft:'38;5;243',
+  prDraft:'38;5;245',
 };
 
 // ---- helpers -----------------------------------------------------------------
@@ -322,13 +322,13 @@ function bar(pct, frame) {
   let out = '';
   for (let i = 0; i < eaten; i++) out += rainbowBean(i);
   out += '\x1b[38;2;255;204;0mᗧ' + Z;
-  for (let i = eaten; i < 9; i++) out += S('38;5;237', '•');
+  for (let i = eaten; i < 9; i++) out += S('38;5;242', '•');
   return out;
 }
 
 // ---- braille dot bar for subscription quota (frameless, 9-state per char) ----
 // Each braille char has 9 states: ⠀ ⠁ ⠃ ⠇ ⡇ ⡏ ⡟ ⡿ ⣿ (0→8 dots filled)
-// width=5 → 40 discrete steps, ~2.5%/step granularity
+// width=5 → 40 discrete steps, ‹› borders, dim background track
 function brailleBar(pct, width, r, g, b) {
   const brailleSteps = ['⠀', '⠁', '⠃', '⠇', '⡇', '⡏', '⡟', '⡿', '⣿'];
   const maxPerChar = 8;
@@ -338,7 +338,8 @@ function brailleBar(pct, width, r, g, b) {
   const part = curStep % maxPerChar;
   const empty = width - full - (part > 0 ? 1 : 0);
   const filled = '⣿'.repeat(full) + (part > 0 ? brailleSteps[part] : '');
-  return (filled ? rgb(r, g, b, filled) : '') + S('38;5;240', '⠤'.repeat(Math.max(0, empty)));
+  const _empty = S(C.muted, '⠀'.repeat(Math.max(0, empty)));
+  return S('38;5;243', '‹') + (filled ? rgb(r, g, b, filled) : '') + _empty + S('38;5;243', '›');
 }
 
 // ==============================================================================
@@ -656,13 +657,13 @@ const model = I.model?.display_name || '';
     if (usedPct !== null) {
       // barGrad: 0% used = sage (safe) → 100% used = rust (danger)
       // barGrad input is "remaining %" so we pass (100 - usedPct)
-      prog = S('38;5;240', '⦗') + bar(usedPct, _animFrame) + S('38;5;240', '⦘') + (() => {
+      prog = S('38;5;243', '⦗') + bar(usedPct, _animFrame) + S('38;5;243', '⦘') + (() => {
         const [r, g, b] = barGrad(100 - usedPct);
         return rgb(r, g, b, pad(usedPct, 3) + '%');
       })();
       ctxWarn = usedPct >= 85 ? S(C.warn, ' ⚠') : '';
     } else {
-      prog = S('38;5;240', '⦗') + bar(0, _animFrame) + S('38;5;240', '⦘') + S('38;5;243', ' ...');
+      prog = S('38;5;243', '⦗') + bar(0, _animFrame) + S('38;5;243', '⦘') + S('38;5;245', ' ...');
     }
     L2.push(prog + ctxWarn);
 
