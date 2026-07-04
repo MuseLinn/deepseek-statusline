@@ -326,6 +326,21 @@ function bar(pct, frame) {
   return out;
 }
 
+// ---- braille dot bar for subscription quota (frameless, 7-step per char) ----
+// Each braille char has 8 states: ⠀ ⠃ ⠇ ⡇ ⡏ ⡟ ⡿ ⣿ (0→7 dots filled)
+// width=3 → 21 discrete steps, ~4.8%/step granularity
+function brailleBar(pct, width, r, g, b) {
+  const brailleSteps = ['⠀', '⠃', '⠇', '⡇', '⡏', '⡟', '⡿', '⣿'];
+  const maxPerChar = brailleSteps.length - 1;
+  const totalSteps = width * maxPerChar;
+  const curStep = Math.min(Math.round((pct / 100) * totalSteps), totalSteps);
+  const full = Math.floor(curStep / maxPerChar);
+  const part = curStep % maxPerChar;
+  const empty = width - full - (part > 0 ? 1 : 0);
+  const filled = '⣿'.repeat(full) + (part > 0 ? brailleSteps[part] : '');
+  return (filled ? rgb(r, g, b, filled) : '') + S('38;5;237', '⠀'.repeat(Math.max(0, empty)));
+}
+
 // ==============================================================================
 // RENDER
 // ==============================================================================
@@ -468,7 +483,7 @@ const model = I.model?.display_name || '';
           const filled = Math.round(pct * 0.08);
           const empty = 8 - filled;
           const [r, g, b] = barGrad(100 - pct);
-          const barStr = S('38;5;240', '▐') + rgb(r, g, b, '█'.repeat(filled)) + S('38;5;237', '░'.repeat(empty)) + S('38;5;240', '▌');
+          const barStr = brailleBar(pct, 3, r, g, b);
           const pctStr = rgb(r, g, b, pad(pct, 2) + '%');
           const resetStr = win.resetsInSeconds ? ' ' + S(C.clock, '⇢' + fmtReset(win.resetsInSeconds)) : '';
           parts.push(S(C.muted, lbl + ' ') + barStr + ' ' + pctStr + resetStr);
@@ -641,13 +656,13 @@ const model = I.model?.display_name || '';
     if (usedPct !== null) {
       // barGrad: 0% used = sage (safe) → 100% used = rust (danger)
       // barGrad input is "remaining %" so we pass (100 - usedPct)
-      prog = S('38;5;240', '▐') + bar(usedPct, _animFrame) + S('38;5;240', '▌') + (() => {
+      prog = S('38;5;240', '⦗') + bar(usedPct, _animFrame) + S('38;5;240', '⦘') + (() => {
         const [r, g, b] = barGrad(100 - usedPct);
         return rgb(r, g, b, pad(usedPct, 3) + '%');
       })();
       ctxWarn = usedPct >= 85 ? S(C.warn, ' ⚠') : '';
     } else {
-      prog = S('38;5;240', '▐') + bar(0, _animFrame) + S('38;5;240', '▌') + S('38;5;243', ' ...');
+      prog = S('38;5;240', '⦗') + bar(0, _animFrame) + S('38;5;240', '⦘') + S('38;5;243', ' ...');
     }
     L2.push(prog + ctxWarn);
 
