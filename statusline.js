@@ -305,13 +305,13 @@ function getGit() {
 }
 
 // ---- progress bar: Pac-Man eats rainbow beans ----------------------------
-// Eaten: ● (rainbow per position+frame), Pac-Man: ᗧ (yellow), Uneaten: · (dim)
+// Eaten: ╌ rainbow track, Pac-Man: ᗧ (yellow), Uneaten: • (dim)
 // At 100% all beans eaten, Pac-Man disappears
 function bar(pct, frame) {
   const rainbowBean = (i) => {
     const hue = ((frame + i * 30) % 360) / 360;
     const [rr, gg, bb] = hsvToRgb(hue, 0.85, 1.0);
-    return rgb(rr, gg, bb, '●');
+    return rgb(rr, gg, bb, '╌');
   };
   if (pct >= 100) {
     let out = '';
@@ -322,23 +322,23 @@ function bar(pct, frame) {
   let out = '';
   for (let i = 0; i < eaten; i++) out += rainbowBean(i);
   out += '\x1b[38;2;255;204;0mᗧ' + Z;
-  for (let i = eaten; i < 9; i++) out += S('38;5;237', '·');
+  for (let i = eaten; i < 9; i++) out += S('38;5;237', '•');
   return out;
 }
 
-// ---- braille dot bar for subscription quota (frameless, 7-step per char) ----
-// Each braille char has 8 states: ⠀ ⠃ ⠇ ⡇ ⡏ ⡟ ⡿ ⣿ (0→7 dots filled)
-// width=3 → 21 discrete steps, ~4.8%/step granularity
+// ---- braille dot bar for subscription quota (frameless, 9-state per char) ----
+// Each braille char has 9 states: ⠀ ⠁ ⠃ ⠇ ⡇ ⡏ ⡟ ⡿ ⣿ (0→8 dots filled)
+// width=5 → 40 discrete steps, ~2.5%/step granularity
 function brailleBar(pct, width, r, g, b) {
-  const brailleSteps = ['⠀', '⠃', '⠇', '⡇', '⡏', '⡟', '⡿', '⣿'];
-  const maxPerChar = brailleSteps.length - 1;
+  const brailleSteps = ['⠀', '⠁', '⠃', '⠇', '⡇', '⡏', '⡟', '⡿', '⣿'];
+  const maxPerChar = 8;
   const totalSteps = width * maxPerChar;
   const curStep = Math.min(Math.round((pct / 100) * totalSteps), totalSteps);
   const full = Math.floor(curStep / maxPerChar);
   const part = curStep % maxPerChar;
   const empty = width - full - (part > 0 ? 1 : 0);
   const filled = '⣿'.repeat(full) + (part > 0 ? brailleSteps[part] : '');
-  return (filled ? rgb(r, g, b, filled) : '') + S('38;5;237', '⠀'.repeat(Math.max(0, empty)));
+  return (filled ? rgb(r, g, b, filled) : '') + S('38;5;240', '⠤'.repeat(Math.max(0, empty)));
 }
 
 // ==============================================================================
