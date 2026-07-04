@@ -440,7 +440,7 @@ const model = I.model?.display_name || '';
         // data is inconsistent (compression artifact), so clamp
         const effCache = Math.min(tc, ti);
         s.in = pi + ti; s.out = po + to; s.cache = pc + effCache;
-        s.turns = (s.turns || 0) + 1;
+        if (hl) s.turns = (s.turns || 0) + 1; // skip first-init phantom turn
         s.paid = (s.paid || 0) + ((ti - effCache) * p.i + effCache * p.c + to * p.o) / 1e6;
       }
     } else if (oc) {
