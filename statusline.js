@@ -483,7 +483,7 @@ const model = I.model?.display_name || '';
           const filled = Math.round(pct * 0.08);
           const empty = 8 - filled;
           const [r, g, b] = barGrad(100 - pct);
-          const barStr = brailleBar(pct, 3, r, g, b);
+          const barStr = brailleBar(pct, 5, r, g, b);
           const pctStr = rgb(r, g, b, pad(pct, 2) + '%');
           const resetStr = win.resetsInSeconds ? ' ' + S(C.clock, '⇢' + fmtReset(win.resetsInSeconds)) : '';
           parts.push(S(C.muted, lbl + ' ') + barStr + ' ' + pctStr + resetStr);
