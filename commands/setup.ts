@@ -82,7 +82,7 @@ if (process.platform === 'win32') {
 config.statusLine = {
   type: 'command',
   command: command,
-  refreshInterval: 10,
+  refreshInterval: 3,
   hideVimModeIndicator: true,
 };
 
@@ -109,13 +109,14 @@ log('✨ Setup complete!');
 log('Restart Claude Code to see the statusline.');
 console.log('');
 log('The statusline shows:');
-log('  Line 1: git branch . repo link . project dir . model/agent . balance . clock');
-log('  Line 2: context bar [200K] . tokens (cache) . turn cost . total . code churn');
+log('  Line 1: git branch . repo link . project dir . model(badge+tier) . clock');
+log('  Line 2: ⦗Pac-Man bar⦘ . tokens . cost . turns . code churn');
 if (subagentScriptSource && existsSync(subagentScriptSource)) {
   log('  Agent panel: agent rows with type badge, status, time, tokens');
 }
 console.log('');
-log('New in v0.5.0: clickable repo link, session name, agent name, thinking indicator');
+log('Features: rainbow model animation, Pac-Man context bar, braille quota bars');
+log('  DeepSeek ¥ balance/cost, opencode go usage, git, PR, vim mode');
 console.log('');
 log('Tip: Set your DeepSeek API key in settings.json env.ANTHROPIC_AUTH_TOKEN');
 log('  or export DEEP_SEEK_API_KEY_FOR_BALANCE in your shell profile.');

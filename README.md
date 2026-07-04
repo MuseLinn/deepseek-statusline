@@ -5,16 +5,18 @@
 A [Claude Code](https://code.claude.com/) statusline plugin with Anthropic-warm palette, supporting DeepSeek, opencode go, and Anthropic providers. Pac-Man progress bar, git porcelain, code churn.
 
 ```
-main 1M1A │ ~/project │ Sonnet → deepseek-v4-flash ⚡high │ 14:32
-▐●●●●ᗧ·····▌ 45% │ 155K/200K │ +128 -38 │ 24 turns
-5h ▐████░░▌ 12%  wk ▐████████░░▌ 20%  mo ▐█████████████████░░░▌ 35%
+⦗╌╌╌╌╌ᗧ••••⦘ 73% │ in:1.7M │ 📦54.8M 96.9% │ ¥0.0092 │ +10740 -23
+main +1M·1A │ ~/project │ Fable → deepseek-v4-pro ⚡max │ ¥18.50 │ 14:32
+5h ‹⣿⣿⣿⡟⠀› 50% ⇢3h  wk ‹⣿⣿⡟⠀⠀› 25% ⇢4d  mo ‹⣿⡟⠀⠀⠀› 12% ⇢18d
 ```
 
 ## Features
 
 | Feature | DeepSeek | opencode go | Anthropic |
 |---|---|---|---|
-| Context bar (Pac-Man eating beans) | ✅ | ✅ | ✅ |
+| Rainbow model animation (per-char TrueColor) | ✅ | ✅ | ✅ |
+| Context bar (Pac-Man with rainbow track) | ✅ | ✅ | ✅ |
+| Braille quota bar (‹…› with ⬌ borders) | — | ✅ | — |
 | Token counts (in/out) | ✅ | ✅ | ✅ |
 | Cache hit % | ✅ | — | — |
 | Cost tracking (¥) | ✅ | — | — |
@@ -40,7 +42,7 @@ main 1M1A │ ~/project │ Sonnet → deepseek-v4-flash ⚡high │ 14:32
 ```bash
 claude plugin marketplace add MuseLinn/muselinn-garage
 claude plugin install claude-code-statusline
-/statusline-setup
+/claude-code-statusline:setup
 ```
 
 Restart Claude Code.
@@ -129,7 +131,7 @@ The setup command (`/claude-code-statusline:setup`) installs this automatically.
 
 ## How it works
 
-1. Claude Code pipes session JSON to the script via stdin (refreshInterval: 10s)
+1. Claude Code pipes session JSON to the script via stdin (refreshInterval: 3s)
 2. Script renders model, context bar (Pac-Man), tokens, git, etc.
 3. Session state persisted in `~/.claude/deepseek-cache.json`, auto-cleaned after 7 days
 4. DeepSeek: balance fetched from `/user/balance`, cached 5 min
