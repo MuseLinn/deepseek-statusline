@@ -112,8 +112,21 @@ function fcny(n) {
   return n.toFixed(2);
 }
 function pad(n, w) { return n.toString().padStart(w); }
-function fmtReset(sec) {
+function fmtReset(sec, mode) {
   if (!sec || sec <= 0) return '';
+  if (mode === 'hm') {
+    const h = Math.floor(sec / 3600);
+    const m = Math.floor((sec % 3600) / 60);
+    if (h >= 24) return Math.round(sec / 86400) + 'd';
+    return h + 'h ' + m + 'm';
+  }
+  if (mode === 'dh') {
+    const d = Math.floor(sec / 86400);
+    const h = Math.floor((sec % 86400) / 3600);
+    if (d >= 30) return Math.round(sec / 86400) + 'd';
+    return d + 'd ' + h + 'h';
+  }
+  // legacy single-unit (fallback / for other callers)
   if (sec >= 86400) return Math.round(sec / 86400) + 'd';
   if (sec >= 3600) return Math.round(sec / 3600) + 'h';
   if (sec >= 60) return Math.round(sec / 60) + 'm';
@@ -486,7 +499,8 @@ const model = I.model?.display_name || '';
           const [r, g, b] = barGrad(100 - pct);
           const barStr = brailleBar(pct, 5, r, g, b);
           const pctStr = rgb(r, g, b, pct + '%');
-          const resetStr = win.resetsInSeconds ? ' ' + S(C.clock, '⇢ ' + fmtReset(win.resetsInSeconds)) : '';
+          const mode = w === 'rolling' ? 'hm' : 'dh';
+          const resetStr = win.resetsInSeconds ? ' ' + S(C.clock, '⇢ ' + fmtReset(win.resetsInSeconds, mode)) : '';
           parts.push(S(C.muted, lbl + ' ') + barStr + ' ' + pctStr + resetStr);
         }
         if (parts.length) line3 = parts.join(' ');
