@@ -318,7 +318,7 @@ function bar(pct, frame) {
     for (let i = 0; i < 10; i++) out += rainbowBean(i);
     return out;
   }
-  const eaten = Math.min(9, Math.round(pct / 10));
+  const eaten = Math.min(9, Math.round(pct * 9 / 100));
   let out = '';
   for (let i = 0; i < eaten; i++) out += rainbowBean(i);
   out += '\x1b[38;2;255;204;0mᗧ' + Z;
@@ -486,7 +486,7 @@ const model = I.model?.display_name || '';
           const [r, g, b] = barGrad(100 - pct);
           const barStr = brailleBar(pct, 5, r, g, b);
           const pctStr = rgb(r, g, b, pad(pct, 2) + '%');
-          const resetStr = win.resetsInSeconds ? ' ' + S(C.clock, '⇢' + fmtReset(win.resetsInSeconds)) : '';
+          const resetStr = win.resetsInSeconds ? ' ' + S(C.clock, '⇢ ' + fmtReset(win.resetsInSeconds)) : '';
           parts.push(S(C.muted, lbl + ' ') + barStr + ' ' + pctStr + resetStr);
         }
         if (parts.length) line3 = parts.join(' ');
